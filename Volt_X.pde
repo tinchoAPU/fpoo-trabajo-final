@@ -1,4 +1,3 @@
-// Constantes para la Máquina de Estados
 final int ESTADO_PRESENTACION = 0;
 final int ESTADO_MENU = 1;
 final int ESTADO_JUEGO = 2;
@@ -8,23 +7,24 @@ final int ESTADO_DERROTA = 5;
 
 int estadoActual = ESTADO_PRESENTACION;
 
-// Variables de tiempo (deltaTime)
 int tiempoAnterior = 0;
 float deltaTime = 0;
+
+Jugador miDron;
 
 void setup() {
   size(800, 600);
   textAlign(CENTER, CENTER);
   textSize(32);
+  
+  miDron = new Jugador(100, 100);
 }
 
 void draw() {
-  // Cálculo básico de deltaTime
   int tiempoActual = millis();
   deltaTime = (tiempoActual - tiempoAnterior) / 1000.0;
   tiempoAnterior = tiempoActual;
 
-  // Máquina de estados principal
   switch (estadoActual) {
     case ESTADO_PRESENTACION:
       dibujarPresentacion();
@@ -47,7 +47,6 @@ void draw() {
   }
 }
 
-// --- MÉTODOS DE DIBUJO POR ESTADO (Greyboxing) ---
 
 void dibujarPresentacion() {
   background(0);
@@ -63,12 +62,19 @@ void dibujarMenu() {
 
 void dibujarJuego() {
   background(100, 200, 255); 
-  fill(0);
-  text("ESTADO: JUGANDO\nPresiona 'P' para Pausar\n'V' para Victoria | 'D' para Derrota", width/2, height/2);
+
+  fill(100);
+  rect(0, height - 20, width, 20);
+
+  miDron.actualizar(deltaTime);
+  miDron.dibujar();
+
+  if (miDron.bateria <= 0) {
+    estadoActual = ESTADO_DERROTA;
+  }
 }
 
 void dibujarPausa() {
-  // Rectángulo semitransparente para simular congelamiento
   fill(0, 10); 
   rect(0, 0, width, height);
   fill(255);
@@ -87,7 +93,6 @@ void dibujarDerrota() {
   text("DERROTA\nBatería agotada.\nPresiona ENTER para volver al menú", width/2, height/2);
 }
 
-// --- CONTROL DE TRANSICIONES BÁSICAS ---
 
 void keyPressed() {
   if (estadoActual == ESTADO_PRESENTACION && keyCode == ENTER) {
@@ -95,12 +100,15 @@ void keyPressed() {
   }
   else if (estadoActual == ESTADO_MENU && keyCode == ENTER) {
     estadoActual = ESTADO_JUEGO;
-    // Aquí llamaremos a cargarNivel() más adelante
   }
   else if (estadoActual == ESTADO_JUEGO) {
     if (key == 'p' || key == 'P') estadoActual = ESTADO_PAUSA;
     if (key == 'v' || key == 'V') estadoActual = ESTADO_VICTORIA; 
     if (key == 'd' || key == 'D') estadoActual = ESTADO_DERROTA;  
+    
+    if (keyCode == UP || key == ' ') {
+      miDron.saltar();
+    }
   }
   else if (estadoActual == ESTADO_PAUSA && (key == 'p' || key == 'P')) {
     estadoActual = ESTADO_JUEGO;
