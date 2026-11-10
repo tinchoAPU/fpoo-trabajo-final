@@ -18,6 +18,8 @@ NivelTilemap nivelActual;
 
 ArrayList<Proyectil> listaProyectiles = new ArrayList<Proyectil>();
 
+ArrayList<Item> listaItems = new ArrayList<Item>();
+
 // --- DISEÑO DEL NIVEL (Matriz de 15 filas x 50 columnas) ---
 // 0 = Vacío, 1 = Piso, 2 = Lava, 3 = Plataforma de Metal
 int[][] disenoNivel1 = {
@@ -33,7 +35,7 @@ int[][] disenoNivel1 = {
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,4,0,0,0,0,4,4,0,0,4,0,0},
+  {0,0,0,0,5,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,4,0,0,0,0,4,4,0,0,4,0,0},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, // El suelo (nótese el pozo y la lava)
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
@@ -79,6 +81,15 @@ void cargarEntidades() {
         // ¡Magia! Borramos el 4 del mapa lógico (lo volvemos 0, aire)
         // porque el enemigo ya nació como objeto y no queremos que el mapa dibuje nada extraño ahí.
         //nivelActual.mapa[fila][col] = 0; 
+      }
+      
+      if (nivelActual.mapa[fila][col] == 5) {
+        float posX = col * nivelActual.tamTile;
+        float posY = fila * nivelActual.tamTile;
+        
+        listaItems.add(new Item(posX, posY, "BLASTER"));
+        // Borramos el 5 del mapa lógico (al igual que con el enemigo, si los dibujas por bloque)
+        // nivelActual.mapa[fila][col] = 0; 
       }
     }
   }
@@ -154,6 +165,20 @@ void dibujarJuego() {
       }
     }
   }
+  
+  // --- ACTUALIZACIÓN DE ÍTEMS (El Traspaso) ---
+  for (int i = listaItems.size() - 1; i >= 0; i--) {
+    Item item = listaItems.get(i);
+    item.dibujar(camX);
+    
+    if (miDron.colisiona(item)) {
+      if (item.tipo.equals("BLASTER")) {
+        miDron.armaEquipada = item; // El jugador adquiere la referencia (Agregación)
+      }
+      listaItems.remove(i); // El ítem desaparece del suelo
+    }
+  }
+  
 
   // Verificación de derrota (Batería cero o caída al vacío)
   if (miDron.bateria <= 0 || miDron.y > height + 100) {

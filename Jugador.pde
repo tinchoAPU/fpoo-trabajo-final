@@ -13,6 +13,8 @@ class Jugador extends Entidad {
   float tiempoEntreDisparos = 0.3; // Segundos que debe esperar para volver a disparar
   float temporizadorDisparo = 0.0; //
   
+  Item armaEquipada = null;
+  
   
   //ArrayList<Proyectil> listaProyectiles = new ArrayList<Proyectil>();
 
@@ -112,8 +114,18 @@ class Jugador extends Entidad {
   }
   
   void disparar() {
+    
+    if (armaEquipada != null && temporizadorDisparo >= tiempoEntreDisparos) {
+      
+      float origenX = x + (ancho / 2);
+      float origenY = y + (alto / 2);
+      
+      listaProyectiles.add(new Proyectil(origenX, origenY, direccionMirando));
+      temporizadorDisparo = 0.0; 
+    }
+    
     // Solo dispara si ya pasó el tiempo de recarga
-    if (temporizadorDisparo >= tiempoEntreDisparos) {
+    /*if (temporizadorDisparo >= tiempoEntreDisparos) {
       
       float origenX = x + (ancho / 2);
       float origenY = y + (alto / 2);
@@ -122,6 +134,6 @@ class Jugador extends Entidad {
       
       // Reinicia el temporizador para aplicar el cooldown
       temporizadorDisparo = 0.0; 
-    }
+    }*/
   }
 }
