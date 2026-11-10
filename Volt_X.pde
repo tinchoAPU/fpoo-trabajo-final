@@ -16,6 +16,8 @@ Jugador miDron;
 ArrayList<Enemigo> listaEnemigos = new ArrayList<Enemigo>();
 NivelTilemap nivelActual;
 
+ArrayList<Proyectil> listaProyectiles = new ArrayList<Proyectil>();
+
 // --- DISEÑO DEL NIVEL (Matriz de 15 filas x 50 columnas) ---
 // 0 = Vacío, 1 = Piso, 2 = Lava, 3 = Plataforma de Metal
 int[][] disenoNivel1 = {
@@ -128,6 +130,30 @@ void dibujarJuego() {
       }
     }
   }
+  
+  // --- ACTUALIZACIÓN DE PROYECTILES ---
+  for (int i = listaProyectiles.size() - 1; i >= 0; i--) {
+    Proyectil p = listaProyectiles.get(i);
+    p.actualizar(deltaTime, nivelActual);
+    p.dibujar(camX);
+    
+    // 1. Si la bala chocó contra la pared, la borramos
+    if (!p.activo || p.x > camX + width + 100 || p.x < camX - 100) {
+      listaProyectiles.remove(i);
+      continue; // Saltamos a la siguiente bala
+    }
+    
+    // 2. Revisar si esta bala choca con algún enemigo
+    for (int j = listaEnemigos.size() - 1; j >= 0; j--) {
+      Enemigo e = listaEnemigos.get(j);
+      
+      if (p.colisiona(e)) {
+        listaEnemigos.remove(j);    // Destruye al enemigo
+        listaProyectiles.remove(i); // Destruye el láser
+        break; // Sale del bucle de enemigos porque la bala ya no existe
+      }
+    }
+  }
 
   // Verificación de derrota (Batería cero o caída al vacío)
   if (miDron.bateria <= 0 || miDron.y > height + 100) {
@@ -178,6 +204,7 @@ void keyPressed() {
     if (keyCode == LEFT || key == 'a' || key == 'A') miDron.movIzquierda = true;
     if (keyCode == RIGHT || key == 'd' || key == 'D') miDron.movDerecha = true;
     if (keyCode == UP || key == ' ') miDron.saltar();
+    if (key == 'x' || key == 'X') miDron.disparar();
   }
   else if (estadoActual == ESTADO_PAUSA && (key == 'p' || key == 'P')) {
     estadoActual = ESTADO_JUEGO;
@@ -186,6 +213,9 @@ void keyPressed() {
     estadoActual = ESTADO_MENU;
   }
 }
+
+
+
 
 // Se ejecuta al soltar la tecla para detener el dron fluidamente
 void keyReleased() {

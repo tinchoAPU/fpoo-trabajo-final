@@ -8,6 +8,13 @@ class Jugador extends Entidad {
   boolean enSuelo = false;
   boolean movIzquierda = false;
   boolean movDerecha = false;
+  
+  int direccionMirando = 1;
+  float tiempoEntreDisparos = 0.3; // Segundos que debe esperar para volver a disparar
+  float temporizadorDisparo = 0.0; //
+  
+  
+  //ArrayList<Proyectil> listaProyectiles = new ArrayList<Proyectil>();
 
   Jugador(float x, float y) {
     super(x, y, 40, 40);
@@ -15,10 +22,24 @@ class Jugador extends Entidad {
   }
 
   void actualizar(float dt, NivelTilemap mapa, float camX) {
+    
+    temporizadorDisparo += dt;
+    
     // --- 1. MOVIMIENTO HORIZONTAL Y COLISIÓN ---
-    if (movIzquierda) velX = -velMovimiento;
+    /*if (movIzquierda) velX = -velMovimiento;
     else if (movDerecha) velX = velMovimiento;
-    else velX = 0;
+    else velX = 0;*/
+    
+    if (movIzquierda) {
+      velX = -200.0;
+      direccionMirando = -1; // Guarda que miramos a la izquierda
+    } else if (movDerecha) {
+      velX = 200.0;
+      direccionMirando = 1;  // Guarda que miramos a la derecha
+    } else {
+      velX = 0;
+    }
+    
 
     x += velX * dt; // Movemos temporalmente en X
 
@@ -88,5 +109,19 @@ class Jugador extends Entidad {
     rect(x - camX, y - 15, ancho, 5);
     fill(0, 255, 255);
     rect(x - camX, y - 15, map(bateria, 0, 100, 0, ancho), 5);
+  }
+  
+  void disparar() {
+    // Solo dispara si ya pasó el tiempo de recarga
+    if (temporizadorDisparo >= tiempoEntreDisparos) {
+      
+      float origenX = x + (ancho / 2);
+      float origenY = y + (alto / 2);
+      
+      listaProyectiles.add(new Proyectil(origenX, origenY, direccionMirando));
+      
+      // Reinicia el temporizador para aplicar el cooldown
+      temporizadorDisparo = 0.0; 
+    }
   }
 }
