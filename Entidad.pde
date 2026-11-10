@@ -17,15 +17,16 @@ class Entidad {
     y += velY * dt;
   }
 
-  void dibujar() {
+  // IMPORTANTE: Ahora recibe la cámara para el efecto de scroll
+  void dibujar(float camX) {
     fill(255);
-    rect(x, y, ancho, alto);
+    rect(x - camX, y, ancho, alto);
   }
 
-  boolean colisiona(Entidad entidadEntidad) {
-    return (this.x < entidadEntidad.x + entidadEntidad.ancho &&
-            this.x + this.ancho > entidadEntidad.x &&
-            this.y < entidadEntidad.y + entidadEntidad.alto &&
-            this.y + this.alto > entidadEntidad.y);
+  boolean colisiona(Entidad otra) {
+    return (this.x < otra.x + otra.ancho &&
+            this.x + this.ancho > otra.x &&
+            this.y < otra.y + otra.alto &&
+            this.y + this.alto > otra.y);
   }
 }
