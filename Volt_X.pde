@@ -1,3 +1,8 @@
+import processing.sound.*;
+
+SoundFile sonidoBateria;
+SoundFile sonidoPerderVida;
+
 // --- VARIABLES GLOBALES ---
 final int ESTADO_PRESENTACION = 0;
 final int ESTADO_MENU = 1;
@@ -50,6 +55,9 @@ void setup() {
   size(800, 600);
   textAlign(CENTER, CENTER);
   textSize(32);
+  
+  sonidoBateria = new SoundFile(this, "bateria.wav");
+  sonidoPerderVida = new SoundFile(this, "dead.wav");
   
   nivelActual = new NivelTilemap(disenoNivel1);
   miDron = new Jugador(100, 100);
@@ -194,6 +202,10 @@ void dibujarJuego() {
         if (miDron.bateria > 100) miDron.bateria = 100;
         puntajeActual += 50;
         
+        if (sonidoBateria != null) {
+          sonidoBateria.play();
+        }
+        
         bateriasRecolectadas++; // <--- Suma una batería al contador
         if (bateriasRecolectadas >= 10) { // <--- Cada 10 baterías recolectadas...
           vidas++;                        // ¡Vida extra!
@@ -210,6 +222,10 @@ void dibujarJuego() {
   
   // Verificación de derrota (Batería cero o caída al vacío)
   if (miDron.bateria <= 0 || miDron.y > height + 100) {
+    if (sonidoPerderVida != null) {
+      sonidoPerderVida.play();
+    }
+    
     vidas--; // Restamos una vida
     if (vidas > 0) {
       // Sistema de Respawn: Reubicamos al dron al inicio sin perder puntaje total
