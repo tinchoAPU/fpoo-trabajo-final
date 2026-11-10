@@ -22,6 +22,9 @@ ArrayList<Item> listaItems = new ArrayList<Item>();
 int puntajeActual = 0;
 int puntajeTotalFinDeNivel = 0;
 
+int vidas = 3;
+int bateriasRecolectadas = 0;
+
 // --- DISEÑO DEL NIVEL (Matriz de 15 filas x 50 columnas) ---
 // 0 = Vacío, 1 = Piso, 2 = Lava, 3 = Plataforma de Metal, 
 // Entidades: 4 = Enemigo, 5 = Bláster, 6 = Hoverboard, 7 = Batería, 8 = Baliza Victoria
@@ -111,6 +114,18 @@ void dibujarMenu() {
 void dibujarJuego() {
   background(20, 30, 60); // Cielo nocturno
   
+  // --- HUD CLÁSICO (Estilo Adventure Island) ---
+  fill(0, 180); // Fondo semi-transparente para la barra superior
+  rect(0, 0, width, 40);
+  
+  fill(255);
+  textSize(16);
+  textAlign(LEFT, CENTER);
+  text("SCORE: " + nf(puntajeActual, 6), 30, 20); // nf formatea con ceros a la izquierda (ej: 000550)
+  text("VIDAS: " + vidas, 320, 20);
+  text("BATERÍAS: " + bateriasRecolectadas + "/10", 500, 20);
+  textAlign(CENTER, CENTER); // Restauramos la alineación por defecto para el resto del juego
+  
   // Lógica de avance continuo (La cámara no puede retroceder)
   float camaraDeseada = miDron.x - 200;
   if (camaraDeseada > camX) camX = camaraDeseada;
@@ -177,7 +192,13 @@ void dibujarJuego() {
       else if (item.tipo.equals("BATERIA")) {
         miDron.bateria += 20; 
         if (miDron.bateria > 100) miDron.bateria = 100;
-        puntajeActual += 50; 
+        puntajeActual += 50;
+        
+        bateriasRecolectadas++; // <--- Suma una batería al contador
+        if (bateriasRecolectadas >= 10) { // <--- Cada 10 baterías recolectadas...
+          vidas++;                        // ¡Vida extra!
+          bateriasRecolectadas = 0;       // Reinicia el contador parcial
+        }
       }
       else if (item.tipo.equals("BALIZA")) {
         activarVictoria();
@@ -189,7 +210,15 @@ void dibujarJuego() {
   
   // Verificación de derrota (Batería cero o caída al vacío)
   if (miDron.bateria <= 0 || miDron.y > height + 100) {
-    estadoActual = ESTADO_DERROTA;
+    vidas--; // Restamos una vida
+    if (vidas > 0) {
+      // Sistema de Respawn: Reubicamos al dron al inicio sin perder puntaje total
+      miDron = new Jugador(100, 100);
+      camX = 0;
+    } else {
+      // Si ya no quedan vidas, Game Over real
+      estadoActual = ESTADO_DERROTA;
+    }
   }
 }
 
@@ -228,6 +257,8 @@ void keyPressed() {
   else if (estadoActual == ESTADO_MENU && keyCode == ENTER) {
     // Al empezar, reiniciar variables de partida
     puntajeActual = 0;
+    vidas = 3;                // <--- NUEVO
+    bateriasRecolectadas = 0; // <--- NUEVO
     miDron = new Jugador(100, 100);
     camX = 0;
     
