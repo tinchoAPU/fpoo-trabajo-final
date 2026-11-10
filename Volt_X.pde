@@ -35,7 +35,7 @@ int[][] disenoNivel1 = {
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,5,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,4,0,0,0,0,4,4,0,0,4,0,0},
+  {0,0,0,0,5,4,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,4,0,0,0,0,4,4,0,0,4,0,0},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, // El suelo (nótese el pozo y la lava)
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 };
@@ -66,7 +66,10 @@ void draw() {
 }
 
 void cargarEntidades() {
-  listaEnemigos.clear(); // Limpiamos por si el jugador reinicia la partida
+  
+  listaEnemigos.clear(); 
+  listaProyectiles.clear(); // AGREGAR ESTO
+  listaItems.clear();
   
   for (int fila = 0; fila < nivelActual.mapa.length; fila++) {
     for (int col = 0; col < nivelActual.mapa[0].length; col++) {
@@ -90,6 +93,14 @@ void cargarEntidades() {
         listaItems.add(new Item(posX, posY, "BLASTER"));
         // Borramos el 5 del mapa lógico (al igual que con el enemigo, si los dibujas por bloque)
         // nivelActual.mapa[fila][col] = 0; 
+      }
+      
+      
+      // Bloque para crear el Hoverboard
+      if (nivelActual.mapa[fila][col] == 6) {
+        float posX = col * nivelActual.tamTile;
+        float posY = fila * nivelActual.tamTile;
+        listaItems.add(new Item(posX, posY, "HOVERBOARD"));
       }
     }
   }
@@ -135,9 +146,16 @@ void dibujarJuego() {
       e.dibujar(camX);
       
       // Detección de colisión usando el método heredado de la clase Entidad
+      //if (miDron.colisiona(e)) {
+      //  miDron.bateria -= e.danio; // Sufrimos daño
+      //  listaEnemigos.remove(i);   // El dron enemigo se destruye
+      //}
+      
+      
+      // Detección de colisión usando el método heredado de la clase Entidad
       if (miDron.colisiona(e)) {
-        miDron.bateria -= e.danio; // Sufrimos daño
-        listaEnemigos.remove(i);   // El dron enemigo se destruye
+        miDron.recibirDanio(e.danio); // Usamos el nuevo método encapsulado
+        listaEnemigos.remove(i);      // El enemigo se destruye
       }
     }
   }
@@ -171,12 +189,25 @@ void dibujarJuego() {
     Item item = listaItems.get(i);
     item.dibujar(camX);
     
+    /*
     if (miDron.colisiona(item)) {
       if (item.tipo.equals("BLASTER")) {
         miDron.armaEquipada = item; // El jugador adquiere la referencia (Agregación)
       }
       listaItems.remove(i); // El ítem desaparece del suelo
     }
+    */
+    
+    
+    if (miDron.colisiona(item)) {
+      if (item.tipo.equals("BLASTER")) {
+        miDron.armaEquipada = item; 
+      } else if (item.tipo.equals("HOVERBOARD")) {
+        miDron.montura = item; // Agregación de la montura
+      }
+      listaItems.remove(i); 
+    }
+    
   }
   
 

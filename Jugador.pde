@@ -13,7 +13,9 @@ class Jugador extends Entidad {
   float tiempoEntreDisparos = 0.3; // Segundos que debe esperar para volver a disparar
   float temporizadorDisparo = 0.0; //
   
-  Item armaEquipada = null;
+  
+  Item armaEquipada = null; // El espacio para tu Bláster
+  Item montura = null;      // <--- EL ESPACIO PARA TU HOVERBOARD
   
   
   //ArrayList<Proyectil> listaProyectiles = new ArrayList<Proyectil>();
@@ -104,6 +106,13 @@ class Jugador extends Entidad {
   }
 
   void dibujar(float camX) {
+    
+    
+    if (this.montura != null) {
+      fill(200, 50, 255); // Color violeta neón para el hoverboard
+      rect(x - camX - 5, y + alto, ancho + 10, 8); // Un poco más ancho que el dron
+    }
+    
     fill(0, 255, 0);
     rect(x - camX, y, ancho, alto);
     
@@ -135,5 +144,17 @@ class Jugador extends Entidad {
       // Reinicia el temporizador para aplicar el cooldown
       temporizadorDisparo = 0.0; 
     }*/
+  }
+  
+  // Delegación de responsabilidades: El jugador decide cómo sufre el daño
+  void recibirDanio(float cantidad) {
+    if (this.montura != null) {
+      // Tenemos el Hoverboard equipado. Absorbe el impacto y se destruye.
+      this.montura = null; 
+      // ¡No perdemos batería!
+    } else {
+      // No tenemos protección, perdemos batería directamente
+      this.bateria -= cantidad;
+    }
   }
 }
