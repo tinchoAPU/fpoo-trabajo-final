@@ -19,6 +19,10 @@ int tiempoAnterior = 0;
 float deltaTime = 0;
 float camX = 0;
 
+int tiempoInicioPresentacion = 0;
+int duracionPresentacion = 12000;
+String historiaVoltX = "AÑO 2184. PLANETA CHATARRA.\n\nTu batería principal ha colapsado.\nRecupera celdas de energía y escapa\nantes de apagarte para siempre...";
+
 Jugador miDron;
 ArrayList<Enemigo> listaEnemigos = new ArrayList<Enemigo>();
 NivelTilemap nivelActual;
@@ -42,15 +46,13 @@ PImage imgBattery;
 
 
 // 0 = Vacío, 1 = Piso, 2 = Lava, 3 = Plataforma de Metal, 
-// Entidades: 4 = Enemigo, 5 = Bláster, 6 = Hoverboard, 7 = Batería, 8 = Baliza Victoria
+// Entidades: 4 = Enemigo, 5 = Bláster, 6 = Batería, 8 = Baliza Victoria
 int[][] disenoNivel1;
 
 int[][] cargarMapaCSV(String nombreArchivo) {
-  // Carga todas las líneas del archivo de texto
   String[] lineas = loadStrings(nombreArchivo);
   
   int filas = lineas.length;
-  // Cuenta cuántos elementos separados por coma hay en la primera fila
   int columnas = split(lineas[0], ",").length; 
   
   int[][] mapaTemporal = new int[filas][columnas];
@@ -58,7 +60,6 @@ int[][] cargarMapaCSV(String nombreArchivo) {
   for (int i = 0; i < filas; i++) {
     String[] valores = split(lineas[i], ",");
     for (int j = 0; j < columnas; j++) {
-      // trim() limpia los espacios en blanco invisibles y int() lo convierte a número
       mapaTemporal[i][j] = int(trim(valores[j])); 
     }
   }
@@ -84,24 +85,20 @@ void setup() {
     }
   }
   
-  
   sonidoBateria = new SoundFile(this, "bateria.wav");
   sonidoPerderVida = new SoundFile(this, "dead.wav");
   musicaFondo = new SoundFile(this, "level_music.wav");
   
   nivelActual = new NivelTilemap(disenoNivel1);
   miDron = new Jugador(100, 100);
+  
+  tiempoInicioPresentacion = millis();
 }
 
 void draw() {                                                                                                    
   int tiempoActual = millis();
   deltaTime = (tiempoActual - tiempoAnterior) / 1000.0;
   tiempoAnterior = tiempoActual;
-  
-  /*
-  if (deltaTime > 0.05) {
-    deltaTime = 0.05; 
-  }*/
   
   switch (estadoActual) {
     case ESTADO_PRESENTACION: dibujarPresentacion(); break;
@@ -126,7 +123,6 @@ void cargarEntidades() {
       
       if (nivelActual.mapa[fila][col] == 4) listaEnemigos.add(new Enemigo(posX, posY));
       else if (nivelActual.mapa[fila][col] == 5) listaItems.add(new Item(posX, posY, "BLASTER"));
-      else if (nivelActual.mapa[fila][col] == 6) listaItems.add(new Item(posX, posY, "HOVERBOARD"));
       else if (nivelActual.mapa[fila][col] == 7) listaItems.add(new Item(posX, posY, "BATERIA"));
       else if (nivelActual.mapa[fila][col] == 8) listaItems.add(new Item(posX, posY, "BALIZA"));
     }
@@ -143,20 +139,85 @@ void activarVictoria() {
 
 
 void dibujarPresentacion() {
-  background(0);
-  fill(255);
-  text("Cinemática de Aterrizaje...\n(Presiona ENTER para continuar)", width/2, height/2);
+  background(5, 8, 18);
+  
+  int tiempoTranscurrido = millis() - tiempoInicioPresentacion;
+  
+  stroke(0, 100, 180, 40);
+  strokeWeight(1);
+  float offsetGrid = (frameCount * 1.5) % 30;
+  for (float y = 0; y < height; y += 30) {
+    line(0, y + offsetGrid, width, y + offsetGrid);
+  }
+  for (float x = 0; x < width; x += 40) {
+    line(x, 0, x, height);
+  }
+  
+  pushMatrix();
+  translate(width/2, 110);
+  
+  float rx = random(-1.5, 1.5);
+  float ry = random(-1.5, 1.5);
+  
+  fill(0, 200, 255, 90);
+  textSize(66);
+  textAlign(CENTER, CENTER);
+  text("VOLT-X", rx + 3, ry + 3);
+  text("VOLT-X", rx - 3, ry - 3);
+  
+  fill(240, 255, 255);
+  textSize(64);
+  text("VOLT-X", rx, ry);
+  popMatrix();
+  
+  fill(0, 255, 180);
+  textSize(16);
+  text("— ESCAPE DE CHATARRA —", width/2, 170);
+
+  int charsVisibles = min(historiaVoltX.length(), tiempoTranscurrido / 40);
+  String textoProgresivo = historiaVoltX.substring(0, charsVisibles);
+  
+  fill(200, 220, 240);
+  textSize(18);
+  rectMode(CENTER);
+  text(textoProgresivo, width/2, height/2 + 40);
+  rectMode(CORNER);
+
+  if ((frameCount / 25) % 2 == 0) {
+    fill(255, 200, 0);
+    textSize(14);
+    text("[ PRESIONA ENTER PARA OMITIR ]", width/2, height - 50);
+  }
+  
+  if (tiempoTranscurrido >= duracionPresentacion) {
+    estadoActual = ESTADO_MENU;
+  }
 }
 
 void dibujarMenu() {
-  background(50, 50, 150);
+  background(20, 25, 45);
+  
+  fill(0, 255, 200);
+  textSize(48);
+  text("VOLT-X", width/2, height/2 - 80);
+  
   fill(255);
-  text("VOLT-X: ESCAPE DE CHATARRA\n\nPresiona ENTER para Jugar", width/2, height/2);
+  textSize(20);
+  text("ESCAPE DE CHATARRA", width/2, height/2 - 30);
+  
+  // Botón simulado
+  fill(0, 180, 150);
+  stroke(0, 255, 200);
+  strokeWeight(2);
+  rect(width/2 - 140, height/2 + 30, 280, 50, 10);
+  
+  fill(255);
+  noStroke();
+  textSize(18);
+  text("PRESIONA ENTER PARA JUGAR", width/2, height/2 + 55);
 }
 
 void dibujarJuego() {
-  //background(20, 30, 60);
-  
   dibujarFondoParallax(camX);
   
   fill(0, 180);
@@ -222,9 +283,7 @@ void dibujarJuego() {
       if (item.tipo.equals("BLASTER")) {
         miDron.armaEquipada = item; 
       } 
-      else if (item.tipo.equals("HOVERBOARD")) {
-        miDron.montura = item; 
-      }
+      
       else if (item.tipo.equals("BATERIA")) {
         miDron.bateria += 20; 
         if (miDron.bateria > 100) miDron.bateria = 100;
@@ -293,31 +352,14 @@ void dibujarDerrota() {
   text("DERROTA\nBatería agotada o Caída crítica.\nPresiona ENTER para volver al menú", width/2, height/2);
 }
 
-
-//PRIMERO
-/*void dibujarFondoParallax(float camaraX) {
-  for (int i = 0; i < 4; i++) { // Bucle hasta 4
-    if (capasFondo[i] == null) continue; 
-    
-    float posX = -(camaraX * velocidadesParallax[i]) % capasFondo[i].width;
-    image(capasFondo[i], posX, 0); 
-    image(capasFondo[i], posX + capasFondo[i].width, 0); 
-  }
-}*/
-
 void dibujarFondoParallax(float camaraX) {
   for (int i = 0; i < 8; i++) {
     if (capasFondo[i] == null) continue; 
     
-    // 1. Calculamos el desplazamiento absoluto en positivo
-    // 2. Aplicamos el módulo respecto al ancho de la pantalla
-    // 3. Lo convertimos a entero (int) para ahorrarle cálculos de píxeles intermedios a la CPU
     int desplazamientoX = (int)(camaraX * velocidadesParallax[i]) % width;
     
-    // 4. Restamos para moverlo a la izquierda de forma segura
     int posX = -desplazamientoX;
     
-    // Dibujamos usando la variable global 'width' en lugar de consultar el objeto de la imagen
     image(capasFondo[i], posX, 0); 
     image(capasFondo[i], posX + width, 0); 
   }
@@ -347,7 +389,6 @@ void keyPressed() {
   }
   else if (estadoActual == ESTADO_JUEGO) {
     if (key == 'p' || key == 'P') estadoActual = ESTADO_PAUSA;
-    if (key == 'v' || key == 'V') estadoActual = ESTADO_VICTORIA; 
     
     if (keyCode == LEFT || key == 'a' || key == 'A') miDron.movIzquierda = true;
     if (keyCode == RIGHT || key == 'd' || key == 'D') miDron.movDerecha = true;

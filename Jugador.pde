@@ -13,11 +13,8 @@ class Jugador extends Entidad {
   float tiempoEntreDisparos = 0.3;
   float temporizadorDisparo = 0.0;
   
-  
   Item armaEquipada = null;
-  Item montura = null;
   
-
   Jugador(float x, float y) {
     super(x, y, 40, 40);
     this.bateria = 100.0;
@@ -87,13 +84,7 @@ class Jugador extends Entidad {
   }
 
   void dibujar(float camX) {
-    
-    
-    if (this.montura != null) {
-      fill(200, 50, 255);
-      rect(x - camX - 5, y + alto, ancho + 10, 8);
-    }
-    
+        
     fill(0, 255, 0);
     rect(x - camX, y, ancho, alto);
     
@@ -116,10 +107,6 @@ class Jugador extends Entidad {
   }
   
   void recibirDanio(float cantidad) {
-    if (this.montura != null) {
-      this.montura = null; 
-    } else {
       this.bateria -= cantidad;
-    }
   }
 }

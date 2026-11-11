@@ -14,14 +14,7 @@ class Item extends Entidad {
       textSize(16);
       text("A", x - camX + ancho/2, y + alto/2 - 2);
     } 
-    else if (tipo.equals("HOVERBOARD")) {
-      fill(200, 50, 255);
-      rect(x - camX, y, ancho, alto);
-      fill(255);
-      textSize(16);
-      text("H", x - camX + ancho/2, y + alto/2 - 2);
-    }
-    
+        
     else if (tipo.equals("BATERIA")) {
       fill(50, 255, 50);
       rect(x - camX, y, ancho, alto);
