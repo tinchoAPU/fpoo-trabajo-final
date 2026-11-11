@@ -17,7 +17,6 @@ class Entidad {
     y += velY * dt;
   }
 
-  // IMPORTANTE: Ahora recibe la cámara para el efecto de scroll
   void dibujar(float camX) {
     fill(255);
     rect(x - camX, y, ancho, alto);
