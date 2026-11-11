@@ -39,7 +39,11 @@ int bateriasRecolectadas = 0;
 
 PImage[] framesBateria;
 int cantFramesBateria = 4;
+
 ParallaxDrawer parallaxDrawer;
+StateDrawer stateDrawer;
+HudManager hudManager; 
+
 
 // 0 = Vacío, 1 = Piso, 2 = Lava, 3 = Plataforma de Metal, 
 // Entidades: 4 = Enemigo, 5 = Bláster, 6 = Batería, 8 = Baliza Victoria
@@ -52,6 +56,8 @@ void setup() {
   
   CsvManager csvManager = new CsvManager();
   parallaxDrawer = new ParallaxDrawer();
+  stateDrawer = new StateDrawer();
+  hudManager = new HudManager();
   
   PImage sheetBateria = loadImage("Battery.png");
   framesBateria = new PImage[cantFramesBateria];
@@ -67,8 +73,6 @@ void setup() {
   
   
   disenoNivel1 = csvManager.cargarMapaCSV("nivel1.csv");
-  
-  
   
   sonidoBateria = new SoundFile(this, "bateria.wav");
   sonidoPerderVida = new SoundFile(this, "dead.wav");
@@ -86,12 +90,12 @@ void draw() {
   tiempoAnterior = tiempoActual;
   
   switch (estadoActual) {
-    case ESTADO_PRESENTACION: dibujarPresentacion(); break;
-    case ESTADO_MENU: dibujarMenu(); break;
+    case ESTADO_PRESENTACION: stateDrawer.dibujarPresentacion(); break;
+    case ESTADO_MENU: stateDrawer.dibujarMenu(); break;
     case ESTADO_JUEGO: dibujarJuego(); break;
-    case ESTADO_PAUSA: dibujarPausa(); break;
-    case ESTADO_VICTORIA: dibujarVictoria(); break;
-    case ESTADO_DERROTA: dibujarDerrota(); break;
+    case ESTADO_PAUSA: stateDrawer.dibujarPausa(); break;
+    case ESTADO_VICTORIA: stateDrawer.dibujarVictoria(); break;
+    case ESTADO_DERROTA: stateDrawer.dibujarDerrota(); break;
   }
 }
 
@@ -123,97 +127,13 @@ void activarVictoria() {
 }
 
 
-void dibujarPresentacion() {
-  background(5, 8, 18);
-  
-  int tiempoTranscurrido = millis() - tiempoInicioPresentacion;
-  
-  stroke(0, 100, 180, 40);
-  strokeWeight(1);
-  float offsetGrid = (frameCount * 1.5) % 30;
-  for (float y = 0; y < height; y += 30) {
-    line(0, y + offsetGrid, width, y + offsetGrid);
-  }
-  for (float x = 0; x < width; x += 40) {
-    line(x, 0, x, height);
-  }
-  
-  pushMatrix();
-  translate(width/2, 110);
-  
-  float rx = random(-1.5, 1.5);
-  float ry = random(-1.5, 1.5);
-  
-  fill(0, 200, 255, 90);
-  textSize(66);
-  textAlign(CENTER, CENTER);
-  text("VOLT-X", rx + 3, ry + 3);
-  text("VOLT-X", rx - 3, ry - 3);
-  
-  fill(240, 255, 255);
-  textSize(64);
-  text("VOLT-X", rx, ry);
-  popMatrix();
-  
-  fill(0, 255, 180);
-  textSize(16);
-  text("— ESCAPE DE CHATARRA —", width/2, 170);
-
-  int charsVisibles = min(historiaVoltX.length(), tiempoTranscurrido / 40);
-  String textoProgresivo = historiaVoltX.substring(0, charsVisibles);
-  
-  fill(200, 220, 240);
-  textSize(18);
-  rectMode(CENTER);
-  text(textoProgresivo, width/2, height/2 + 40);
-  rectMode(CORNER);
-
-  if ((frameCount / 25) % 2 == 0) {
-    fill(255, 200, 0);
-    textSize(14);
-    text("[ PRESIONA ENTER PARA OMITIR ]", width/2, height - 50);
-  }
-  
-  if (tiempoTranscurrido >= duracionPresentacion) {
-    estadoActual = ESTADO_MENU;
-  }
-}
-
-void dibujarMenu() {
-  background(20, 25, 45);
-  
-  fill(0, 255, 200);
-  textSize(48);
-  text("VOLT-X", width/2, height/2 - 80);
-  
-  fill(255);
-  textSize(20);
-  text("ESCAPE DE CHATARRA", width/2, height/2 - 30);
-  
-  fill(0, 180, 150);
-  stroke(0, 255, 200);
-  strokeWeight(2);
-  rect(width/2 - 140, height/2 + 30, 280, 50, 10);
-  
-  fill(255);
-  noStroke();
-  textSize(18);
-  text("PRESIONA ENTER PARA JUGAR", width/2, height/2 + 55);
-}
-
 void dibujarJuego() {
   parallaxDrawer.dibujarFondoParallax(camX);
   
   fill(0, 180);
   rect(0, 0, width, 40);
   
-  fill(255);
-  textSize(16);
-  textAlign(LEFT, CENTER);
-  text("SCORE: " + nf(puntajeActual, 6), 30, 20);
-  text("VIDAS: " + vidas, 320, 20);
-  text("BATERÍAS: " + bateriasRecolectadas + "/10", 500, 20);
-  textAlign(CENTER, CENTER);
+  hudManager.drawHud(puntajeActual, vidas, bateriasRecolectadas);
   
   float camaraDeseada = miDron.x - 200;
   if (camaraDeseada > camX) camX = camaraDeseada;
@@ -308,32 +228,6 @@ void dibujarJuego() {
       estadoActual = ESTADO_DERROTA;
     }
   }
-}
-
-void dibujarPausa() {
-  fill(0, 10); 
-  rect(0, 0, width, height);
-  fill(255);
-  text("PAUSA\nPresiona 'P' para reanudar", width/2, height/2);
-}
-
-void dibujarVictoria() {
-  background(50, 150, 50);
-  fill(255);
-  text("¡VICTORIA!\nBaliza alcanzada.", width/2, height/2 - 60);
-  
-  textSize(24);
-  text("Puntaje Total: " + puntajeTotalFinDeNivel, width/2, height/2 + 10);
-  
-  textSize(18);
-  text("Presiona ENTER para volver al menú", width/2, height/2 + 70);
-  textSize(32);
-}
-
-void dibujarDerrota() {
-  background(150, 50, 50);
-  fill(255);
-  text("DERROTA\nBatería agotada o Caída crítica.\nPresiona ENTER para volver al menú", width/2, height/2);
 }
 
 // --- CONTROLES Y EVENTOS ---
