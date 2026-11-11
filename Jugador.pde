@@ -1,6 +1,6 @@
 class Jugador extends Entidad {
   float bateria;
-  float consumoBateria = 5.0;
+  float consumoBateria = 3.0;
   float gravedad = 1500.0;
   float fuerzaSalto = -650.0;
   float velMovimiento = 250.0;

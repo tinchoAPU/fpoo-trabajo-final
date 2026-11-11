@@ -38,41 +38,44 @@ float[] velocidadesParallax = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
 PImage imgPiedra;
 PImage imgMagma;
 PImage imgPlatform;
-/*
-PImage[] capasFondo = new PImage[4];
-float[] velocidadesParallax = {0.1, 0.3, 0.5, 0.8}; 
-*/
+PImage imgBattery;
 
 
-// --- DISEÑO DEL NIVEL (Matriz de 15 filas x 50 columnas) ---
 // 0 = Vacío, 1 = Piso, 2 = Lava, 3 = Plataforma de Metal, 
 // Entidades: 4 = Enemigo, 5 = Bláster, 6 = Hoverboard, 7 = Batería, 8 = Baliza Victoria
-int[][] disenoNivel1 = {
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  {0,0,0,0,5,4,7,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,4,0,0,0,0,4,4,0,0,4,8,0},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-};
+int[][] disenoNivel1;
+
+int[][] cargarMapaCSV(String nombreArchivo) {
+  // Carga todas las líneas del archivo de texto
+  String[] lineas = loadStrings(nombreArchivo);
+  
+  int filas = lineas.length;
+  // Cuenta cuántos elementos separados por coma hay en la primera fila
+  int columnas = split(lineas[0], ",").length; 
+  
+  int[][] mapaTemporal = new int[filas][columnas];
+
+  for (int i = 0; i < filas; i++) {
+    String[] valores = split(lineas[i], ",");
+    for (int j = 0; j < columnas; j++) {
+      // trim() limpia los espacios en blanco invisibles y int() lo convierte a número
+      mapaTemporal[i][j] = int(trim(valores[j])); 
+    }
+  }
+  return mapaTemporal;
+}
 
 void setup() {
   size(800, 600);
   textAlign(CENTER, CENTER);
   textSize(32);
   
+  disenoNivel1 = cargarMapaCSV("nivel1.csv");
+  
   imgPiedra = loadImage("piedra.png");
   imgMagma = loadImage("magma.png");
   imgPlatform = loadImage("platform.png");
+  imgBattery = loadImage("Battery.png");
   
   for (int i = 0; i < 8; i++) {
     capasFondo[i] = loadImage("Starry_night_Layer_" + i + ".png");
