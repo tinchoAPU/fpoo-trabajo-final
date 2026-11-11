@@ -34,6 +34,10 @@ int bateriasRecolectadas = 0;
 
 PImage[] capasFondo = new PImage[8];
 float[] velocidadesParallax = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
+
+PImage imgPiedra;
+PImage imgMagma;
+PImage imgPlatform;
 /*
 PImage[] capasFondo = new PImage[4];
 float[] velocidadesParallax = {0.1, 0.3, 0.5, 0.8}; 
@@ -65,6 +69,10 @@ void setup() {
   size(800, 600);
   textAlign(CENTER, CENTER);
   textSize(32);
+  
+  imgPiedra = loadImage("piedra.png");
+  imgMagma = loadImage("magma.png");
+  imgPlatform = loadImage("platform.png");
   
   for (int i = 0; i < 8; i++) {
     capasFondo[i] = loadImage("Starry_night_Layer_" + i + ".png");

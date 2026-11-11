@@ -21,16 +21,19 @@ class NivelTilemap {
           
           switch(tipoTile) {
             case 1:
-              fill(100); 
-              rect(posX, posY, tamTile, tamTile);
+              image(imgPiedra, posX, posY, tamTile, tamTile);
+              /*fill(100); 
+              rect(posX, posY, tamTile, tamTile);*/
               break;
             case 2:
-              fill(255, 50, 0); 
-              rect(posX, posY, tamTile, tamTile);
+              image(imgMagma, posX, posY, tamTile, tamTile);
+              /*fill(255, 50, 0); 
+              rect(posX, posY, tamTile, tamTile);*/
               break;
             case 3:
-              fill(150, 150, 180); 
-              rect(posX, posY, tamTile, tamTile);
+              image(imgPlatform, posX, posY, tamTile, tamTile);
+              /*fill(150, 150, 180);
+              rect(posX, posY, tamTile, tamTile);*/
               break;
           }
         }
