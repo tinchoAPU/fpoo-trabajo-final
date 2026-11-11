@@ -36,54 +36,39 @@ int puntajeTotalFinDeNivel = 0;
 int vidas = 3;
 int bateriasRecolectadas = 0;
 
-PImage[] capasFondo = new PImage[8];
-float[] velocidadesParallax = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
 
-PImage imgPiedra;
-PImage imgMagma;
-PImage imgPlatform;
-PImage imgBattery;
-
+PImage[] framesBateria;
+int cantFramesBateria = 4;
+ParallaxDrawer parallaxDrawer;
 
 // 0 = Vacío, 1 = Piso, 2 = Lava, 3 = Plataforma de Metal, 
 // Entidades: 4 = Enemigo, 5 = Bláster, 6 = Batería, 8 = Baliza Victoria
 int[][] disenoNivel1;
-
-int[][] cargarMapaCSV(String nombreArchivo) {
-  String[] lineas = loadStrings(nombreArchivo);
-  
-  int filas = lineas.length;
-  int columnas = split(lineas[0], ",").length; 
-  
-  int[][] mapaTemporal = new int[filas][columnas];
-
-  for (int i = 0; i < filas; i++) {
-    String[] valores = split(lineas[i], ",");
-    for (int j = 0; j < columnas; j++) {
-      mapaTemporal[i][j] = int(trim(valores[j])); 
-    }
-  }
-  return mapaTemporal;
-}
 
 void setup() {
   size(800, 600);
   textAlign(CENTER, CENTER);
   textSize(32);
   
-  disenoNivel1 = cargarMapaCSV("nivel1.csv");
+  CsvManager csvManager = new CsvManager();
+  parallaxDrawer = new ParallaxDrawer();
   
-  imgPiedra = loadImage("piedra.png");
-  imgMagma = loadImage("magma.png");
-  imgPlatform = loadImage("platform.png");
-  imgBattery = loadImage("Battery.png");
+  PImage sheetBateria = loadImage("Battery.png");
+  framesBateria = new PImage[cantFramesBateria];
   
-  for (int i = 0; i < 8; i++) {
-    capasFondo[i] = loadImage("Starry_night_Layer_" + i + ".png");
-    if (capasFondo[i] != null) {
-      capasFondo[i].resize(width, height); 
+  if (sheetBateria != null) {
+    int anchoFrame = sheetBateria.width / cantFramesBateria;
+    int altoFrame = sheetBateria.height;
+    
+    for (int i = 0; i < cantFramesBateria; i++) {
+      framesBateria[i] = sheetBateria.get(i * anchoFrame, 0, anchoFrame, altoFrame);
     }
   }
+  
+  
+  disenoNivel1 = csvManager.cargarMapaCSV("nivel1.csv");
+  
+  
   
   sonidoBateria = new SoundFile(this, "bateria.wav");
   sonidoPerderVida = new SoundFile(this, "dead.wav");
@@ -205,7 +190,6 @@ void dibujarMenu() {
   textSize(20);
   text("ESCAPE DE CHATARRA", width/2, height/2 - 30);
   
-  // Botón simulado
   fill(0, 180, 150);
   stroke(0, 255, 200);
   strokeWeight(2);
@@ -218,7 +202,7 @@ void dibujarMenu() {
 }
 
 void dibujarJuego() {
-  dibujarFondoParallax(camX);
+  parallaxDrawer.dibujarFondoParallax(camX);
   
   fill(0, 180);
   rect(0, 0, width, 40);
@@ -350,19 +334,6 @@ void dibujarDerrota() {
   background(150, 50, 50);
   fill(255);
   text("DERROTA\nBatería agotada o Caída crítica.\nPresiona ENTER para volver al menú", width/2, height/2);
-}
-
-void dibujarFondoParallax(float camaraX) {
-  for (int i = 0; i < 8; i++) {
-    if (capasFondo[i] == null) continue; 
-    
-    int desplazamientoX = (int)(camaraX * velocidadesParallax[i]) % width;
-    
-    int posX = -desplazamientoX;
-    
-    image(capasFondo[i], posX, 0); 
-    image(capasFondo[i], posX + width, 0); 
-  }
 }
 
 // --- CONTROLES Y EVENTOS ---

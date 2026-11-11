@@ -1,9 +1,15 @@
 class NivelTilemap {
   int[][] mapa;
   int tamTile = 40;
+  PImage imgPiedra;
+  PImage imgMagma;
+  PImage imgPlatform;
   
   NivelTilemap(int[][] diseño) {
     this.mapa = diseño;
+    this.imgPiedra = loadImage("piedra.png");
+    this.imgMagma = loadImage("magma.png");
+    this.imgPlatform = loadImage("platform.png");
   }
   
   void dibujarSuelo(float camX) {

@@ -1,8 +1,11 @@
 class Item extends Entidad {
   String tipo;
+  
+  float frameAnimacion = 0;
+  float velAnimacion = 6.0; // Velocidad de la animación (frames por segundo)
 
   Item(float x, float y, String tipo) {
-    super(x, y, 20, 20);
+    super(x, y, 20, 20); // Tamaño del Hitbox
     this.tipo = tipo;
   }
 
@@ -13,12 +16,18 @@ class Item extends Entidad {
       fill(0);
       textSize(16);
       text("A", x - camX + ancho/2, y + alto/2 - 2);
-    } 
-        
+    }        
     else if (tipo.equals("BATERIA")) {
-      fill(50, 255, 50);
-      rect(x - camX, y, ancho, alto);
-      fill(0); textSize(16); text("+", x - camX + ancho/2, y + alto/2 - 2);
+      frameAnimacion += velAnimacion * deltaTime;
+      
+      if (framesBateria != null && framesBateria.length > 0) {
+        int idx = (int) frameAnimacion % framesBateria.length;
+        image(framesBateria[idx], x - camX, y, ancho, alto);
+      } else {
+        fill(50, 255, 50);
+        rect(x - camX, y, ancho, alto);
+        fill(0); textSize(16); text("+", x - camX + ancho/2, y + alto/2 - 2);
+      }
     }
     else if (tipo.equals("BALIZA")) {
       fill(255);
